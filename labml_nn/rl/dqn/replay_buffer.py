@@ -234,19 +234,19 @@ class ReplayBuffer:
             idx = self.find_prefix_sum_idx(p)
             samples['indexes'][i] = idx
 
-        # $\min_i P(i) = \frac{\min_i p_i^\alpha}{\sum_k p_k^\alpha}$
+        # $$\min_i P(i) = \frac{\min_i p_i^\alpha}{\sum_k p_k^\alpha}$$
         prob_min = self._min() / self._sum()
-        # $\max_i w_i = \bigg(\frac{1}{N} \frac{1}{\min_i P(i)}\bigg)^\beta$
+        # $$\max_i w_i = \bigg(\frac{1}{N} \frac{1}{\min_i P(i)}\bigg)^\beta$$
         max_weight = (prob_min * self.size) ** (-beta)
 
         for i in range(batch_size):
             idx = samples['indexes'][i]
-            # $P(i) = \frac{p_i^\alpha}{\sum_k p_k^\alpha}$
+            # $$P(i) = \frac{p_i^\alpha}{\sum_k p_k^\alpha}$$
             prob = self.priority_sum[idx + self.capacity] / self._sum()
-            # $w_i = \bigg(\frac{1}{N} \frac{1}{P(i)}\bigg)^\beta$
+            # $$w_i = \bigg(\frac{1}{N} \frac{1}{P(i)}\bigg)^\beta$$
             weight = (prob * self.size) ** (-beta)
-            # Normalize by $\frac{1}{\max_i w_i}$,
-            #  which also cancels off the $\frac{1}{N}$ term
+            # Normalize by $$\frac{1}{\max_i w_i}$$,
+            #  which also cancels off the $$\frac{1}{N}$$ term
             samples['weights'][i] = weight / max_weight
 
         # Get samples data
@@ -264,7 +264,7 @@ class ReplayBuffer:
             # Set current max priority
             self.max_priority = max(self.max_priority, priority)
 
-            # Calculate $p_i^\alpha$
+            # Calculate $$p_i^\alpha$$
             priority_alpha = priority ** self.alpha
             # Update the trees
             self._set_priority_min(idx, priority_alpha)

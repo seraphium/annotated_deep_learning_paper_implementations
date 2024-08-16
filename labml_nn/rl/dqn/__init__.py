@@ -110,8 +110,8 @@ $$
         """
         * `q` - $Q(s;\theta_i)$
         * `action` - $a$
-        * `double_q` - $\textcolor{cyan}Q(s';\textcolor{cyan}{\theta_i})$
-        * `target_q` - $\textcolor{orange}Q(s';\textcolor{orange}{\theta_i^{-}})$
+        * `double_q` - $$\textcolor{cyan}Q(s';\textcolor{cyan}{\theta_i})$$ 进行下一步选择目的使用的Q-value矩阵
+        * `target_q` - $$\textcolor{orange}Q(s';\textcolor{orange}{\theta_i^{-}})$$ 进行下一步选择之后的Q-value矩阵
         * `done` - whether the game ended after taking the action
         * `reward` - $r$
         * `weights` - weights of the samples from prioritized experienced replay
@@ -133,14 +133,13 @@ $$
             # Get the best action at state $s'$
             """ $$\mathop{\operatorname{argmax}}_{a'}
             \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i})$$ """
-            # double_q is the training main network
             best_next_action = torch.argmax(double_q, -1)
             """ Get the q value from the target network for the best action at state $s'$
             $$\textcolor{orange}{Q}
             \Big(s',\mathop{\operatorname{argmax}}_{a'}
             \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i}); \textcolor{orange}{\theta_i^{-}}
             \Big)$$ """
-            # 根据上面选出来的action的到Q中找到对应的value
+            # 根据上面选出来的action到Q中找到对应的value
             best_next_q_value = target_q.gather(-1, best_next_action.unsqueeze(-1)).squeeze(-1)
 
             """ Calculate the desired Q value.

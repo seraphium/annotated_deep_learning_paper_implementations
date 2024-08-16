@@ -174,9 +174,9 @@ class Trainer:
             # Get the Q-values of the next state for [Double Q-learning](index.html).
             # Gradients shouldn't propagate for these
             with torch.no_grad():
-                # Get $\textcolor{cyan}Q(s';\textcolor{cyan}{\theta_i})$
+                # Get $$\textcolor{cyan}Q(s';\textcolor{cyan}{\theta_i})$$
                 double_q_value = self.model(obs_to_torch(samples['next_obs']))
-                # Get $\textcolor{orange}Q(s';\textcolor{orange}{\theta_i^{-}})$
+                # Get $$\textcolor{orange}Q(s';\textcolor{orange}{\theta_i^{-}})$$
                 target_q_value = self.target_model(obs_to_torch(samples['next_obs']))
 
             # Compute Temporal Difference (TD) errors, $\delta$, and the loss, $\mathcal{L}(\theta)$.
@@ -187,7 +187,7 @@ class Trainer:
                                              q_value.new_tensor(samples['reward']),
                                              q_value.new_tensor(samples['weights']))
 
-            # Calculate priorities for replay buffer $p_i = |\delta_i| + \epsilon$
+            # Calculate priorities for replay buffer $$p_i = |\delta_i| + \epsilon$$
             new_priorities = np.abs(td_errors.cpu().numpy()) + 1e-6
             # Update replay buffer priorities
             self.replay_buffer.update_priorities(samples['indexes'], new_priorities)
