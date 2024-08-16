@@ -84,7 +84,7 @@ class Trainer:
 
         # Model for sampling and training
         self.model = Model().to(device)
-        # target model to get $\textcolor{orange}Q(s';\textcolor{orange}{\theta_i^{-}})$
+        # target model to get $$\textcolor{orange}Q(s';\textcolor{orange}{\theta_i^{-}})$$
         self.target_model = Model().to(device)
 
         # create workers

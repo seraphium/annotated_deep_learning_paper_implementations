@@ -36,7 +36,7 @@ class QFuncLoss(Module):
     ## Train the model
 
     We want to find optimal action-value function.
-
+$$
     \begin{align}
         Q^*(s,a) &= \max_\pi \mathbb{E} \Big[
             r_t + \gamma r_{t + 1} + \gamma^2 r_{t + 2} + ... | s_t = s, a_t = a, \pi
@@ -46,7 +46,7 @@ class QFuncLoss(Module):
             r + \gamma \max_{a'} Q^* (s', a') | s, a
         \Big]
     \end{align}
-
+$$
     ### Target network 🎯
     In order to improve stability we use experience replay that randomly sample
     from previous experience $U(D)$. We also use a Q network
@@ -81,7 +81,7 @@ class QFuncLoss(Module):
     the value is taken from $\textcolor{orange}{\theta_i^{-}}$.
 
     And the loss function becomes,
-
+$$
     \begin{align}
         \mathcal{L}_i(\theta_i) = \mathop{\mathbb{E}}_{(s,a,r,s') \sim U(D)}
         \Bigg[
@@ -96,7 +96,7 @@ class QFuncLoss(Module):
                 - &Q(s,a;\theta_i)
             \bigg) ^ 2
         \Bigg]
-    \end{align}
+    \end{align}$$
     """
 
     def __init__(self, gamma: float):
@@ -117,37 +117,41 @@ class QFuncLoss(Module):
         * `weights` - weights of the samples from prioritized experienced replay
         """
 
-        # $Q(s,a;\theta_i)$
+        # $$Q(s,a;\theta_i)$$
+        # q.gather(-1, ...) 在最后一个维度上（即动作维度）根据 action 中的索引提取对应的 Q 值，结果形状为 [batch_size, 1]
         q_sampled_action = q.gather(-1, action.to(torch.long).unsqueeze(-1)).squeeze(-1)
         tracker.add('q_sampled_action', q_sampled_action)
 
         # Gradients shouldn't propagate gradients
-        # $$r + \gamma \textcolor{orange}{Q}
-        #                 \Big(s',
-        #                     \mathop{\operatorname{argmax}}_{a'}
-        #                         \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i}); \textcolor{orange}{\theta_i^{-}}
-        #                 \Big)$$
+        """ $$r + \gamma \textcolor{orange}{Q}
+                        \Big(s',
+                            \mathop{\operatorname{argmax}}_{a'}
+                                \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i}); \textcolor{orange}{\theta_i^{-}}
+                        \Big)$$ """
+        #  强调了在计算目标 Q 值时，梯度不应该传播到目标 Q 网络的参数上
         with torch.no_grad():
             # Get the best action at state $s'$
-            # $$\mathop{\operatorname{argmax}}_{a'}
-            #  \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i})$$
+            """ $$\mathop{\operatorname{argmax}}_{a'}
+            \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i})$$ """
+            # double_q is the training main network
             best_next_action = torch.argmax(double_q, -1)
-            # Get the q value from the target network for the best action at state $s'$
-            # $$\textcolor{orange}{Q}
-            # \Big(s',\mathop{\operatorname{argmax}}_{a'}
-            # \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i}); \textcolor{orange}{\theta_i^{-}}
-            # \Big)$$
+            """ Get the q value from the target network for the best action at state $s'$
+            $$\textcolor{orange}{Q}
+            \Big(s',\mathop{\operatorname{argmax}}_{a'}
+            \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i}); \textcolor{orange}{\theta_i^{-}}
+            \Big)$$ """
+            # 根据上面选出来的action的到Q中找到对应的value
             best_next_q_value = target_q.gather(-1, best_next_action.unsqueeze(-1)).squeeze(-1)
 
-            # Calculate the desired Q value.
-            # We multiply by `(1 - done)` to zero out
-            # the next state Q values if the game ended.
-            #
-            # $$r + \gamma \textcolor{orange}{Q}
-            #                 \Big(s',
-            #                     \mathop{\operatorname{argmax}}_{a'}
-            #                         \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i}); \textcolor{orange}{\theta_i^{-}}
-            #                 \Big)$$
+            """ Calculate the desired Q value.
+            We multiply by `(1 - done)` to zero out
+            the next state Q values if the game ended.
+            
+            $$r + \gamma \textcolor{orange}{Q}
+                            \Big(s',
+                                \mathop{\operatorname{argmax}}_{a'}
+                                    \textcolor{cyan}{Q}(s', a'; \textcolor{cyan}{\theta_i}); \textcolor{orange}{\theta_i^{-}}
+                            \Big)$$ """
             q_update = reward + self.gamma * best_next_q_value * (1 - done)
             tracker.add('q_update', q_update)
 

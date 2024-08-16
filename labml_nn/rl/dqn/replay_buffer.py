@@ -31,20 +31,20 @@ class ReplayBuffer:
     prioritization is used, with $\alpha = 0$ corresponding to uniform case.
     $p_i$ is the priority.
 
-    We use proportional prioritization $p_i = |\delta_i| + \epsilon$ where
+    We use proportional prioritization $$p_i = |\delta_i| + \epsilon$$ where
     $\delta_i$ is the temporal difference for transition $i$.
 
     We correct the bias introduced by prioritized replay using
      importance-sampling (IS) weights
     $$w_i = \bigg(\frac{1}{N} \frac{1}{P(i)}\bigg)^\beta$$ in the loss function.
     This fully compensates when $\beta = 1$.
-    We normalize weights by $\frac{1}{\max_i w_i}$ for stability.
+    We normalize weights by $$\frac{1}{\max_i w_i}$$ for stability.
     Unbiased nature is most important towards the convergence at end of training.
     Therefore we increase $\beta$ towards end of training.
 
     ### Binary Segment Tree
     We use a binary segment tree to efficiently calculate
-    $\sum_k^i p_k^\alpha$, the cumulative probability,
+    $$\sum_k^i p_k^\alpha$$, the cumulative probability,
     which is needed to sample.
     We also use a binary segment tree to find $\min p_i^\alpha$,
     which is needed for $\frac{1}{\max_i w_i}$.

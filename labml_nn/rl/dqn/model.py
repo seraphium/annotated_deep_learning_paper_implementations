@@ -25,7 +25,7 @@ class Model(Module):
      the action doesn't matter,
     and in some states the action is significant. Dueling network allows
      this to be represented very well.
-
+$$
     \begin{align}
         Q^\pi(s,a) &= V^\pi(s) + A^\pi(s, a)
         \\
@@ -35,7 +35,7 @@ class Model(Module):
          \Big]
         &= 0
     \end{align}
-
+$$
     So we create two networks for $V$ and $A$ and get $Q$ from them.
     $$
         Q(s, a) = V(s) +
@@ -98,9 +98,9 @@ class Model(Module):
         # $V$
         state_value = self.state_value(h)
 
-        # $A(s, a) - \frac{1}{|\mathcal{A}|} \sum_{a' \in \mathcal{A}} A(s, a')$
+        # $$A(s, a) - \frac{1}{|\mathcal{A}|} \sum_{a' \in \mathcal{A}} A(s, a')$$
         action_score_centered = action_value - action_value.mean(dim=-1, keepdim=True)
-        # $Q(s, a) =V(s) + \Big(A(s, a) - \frac{1}{|\mathcal{A}|} \sum_{a' \in \mathcal{A}} A(s, a')\Big)$
+        # $$Q(s, a) =V(s) + \Big(A(s, a) - \frac{1}{|\mathcal{A}|} \sum_{a' \in \mathcal{A}} A(s, a')\Big)$$
         q = state_value + action_score_centered
 
         return q
