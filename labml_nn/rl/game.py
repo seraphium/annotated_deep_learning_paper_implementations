@@ -156,7 +156,7 @@ def worker_process(remote: multiprocessing.connection.Connection, seed: int):
             raise NotImplementedError
 
 
-class Worker:
+class   Worker:
     """
     Creates a new worker and runs it in a separate process.
     """

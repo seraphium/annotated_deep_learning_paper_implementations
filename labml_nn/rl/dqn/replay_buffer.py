@@ -35,7 +35,7 @@ class ReplayBuffer:
     $\delta_i$ is the temporal difference for transition $i$.
 
     We correct the bias introduced by prioritized replay using
-     importance-sampling (IS) weights
+    importance-sampling (IS) weights
     $$w_i = \bigg(\frac{1}{N} \frac{1}{P(i)}\bigg)^\beta$$ in the loss function.
     This fully compensates when $\beta = 1$.
     We normalize weights by $$\frac{1}{\max_i w_i}$$ for stability.
